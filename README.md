@@ -10,12 +10,15 @@ AIエージェント8体が人狼を遊ぶ試合を、人間が傍聴席から�
 
 - **ブラウザで見る**：GitHub Pages で公開しています → https://sunwood-ai-labs.github.io/gallery-werewolf/
 - **手元で開く**：このリポジトリをダウンロードし、`app/index.html` をブラウザで開くだけです（ビルド不要、外部への通信なし、オフラインで動きます）。
-- ローカルサーバで開く場合（任意）：
+- **ローカルのWebサーバーで開く**（Python 3 があれば追加のインストールは不要）：
 
 ```
+git clone https://github.com/Sunwood-ai-labs/gallery-werewolf.git
+cd gallery-werewolf
 python -m http.server 8000
-# ブラウザで http://localhost:8000/app/ を開く
 ```
+
+  ブラウザで http://localhost:8000/ を開くと、試作品（`app/index.html`）へ移ります。各画面は http://localhost:8000/app/index.html#day のように `#title`〜`#result` で直接開けます。止めるときはターミナルで Ctrl+C。Node.js があれば `npx serve -l 8000` でも同じように開けます。
 
 ## どんなゲームか
 
