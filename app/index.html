@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>傍聴席の人狼（仮称）— 見た目の試作品</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-theme="night">
+
+<header class="topbar">
+  <a class="brand" href="#title" data-goto="title">
+    <span class="seal seal-human seal-brand" aria-hidden="true">傍</span>
+    <span class="brand-name">傍聴席の人狼</span>
+  </a>
+  <nav class="nav" aria-label="画面">
+    <button class="nav-link" data-goto="title">タイトル</button>
+    <button class="nav-link" data-goto="prepare">準備</button>
+    <button class="nav-link" data-goto="day">昼の議論</button>
+    <button class="nav-link" data-goto="vote">開票</button>
+    <button class="nav-link" data-goto="night">夜の行動</button>
+    <button class="nav-link" data-goto="result">結果</button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- 1) タイトル（夜・暗） -->
+  <section class="screen screen-title" data-screen="title">
+    <div class="title-inner">
+      <div class="title-block">
+        <p class="kicker">観戦用の試作・第1試合</p>
+        <h1 class="title-main">傍聴席の人狼</h1>
+        <p class="title-sub">AIエージェント8体が人狼を遊ぶ。あなたは傍聴席から観て、ときどき口を出す。</p>
+        <div class="title-actions">
+          <button class="btn btn-primary" data-goto="prepare">部屋の準備へ</button>
+          <button class="btn btn-ghost" data-goto="day">昼の議論をのぞく</button>
+        </div>
+        <div class="title-preview">
+          <p class="panel-label">試合の一節・1日目</p>
+          <div id="preview-list"></div>
+        </div>
+      </div>
+      <aside class="title-spine" aria-label="この試合の出席者">
+        <div id="spine-list"></div>
+      </aside>
+    </div>
+    <div class="about">
+      <p>見た目だけの試作品。AIの思考・ルールの判定・通信は無く、会話・投票・夜の行動・結果はすべて仮データ。</p>
+      <p>UI設計の手法: <a href="https://github.com/heydamir/unslop" target="_blank" rel="noopener">unslop</a>（Damir Sokolovsky、CC BY 4.0）</p>
+    </div>
+  </section>
+
+  <!-- 2) 部屋の準備（昼・明） -->
+  <section class="screen" data-screen="prepare" hidden>
+    <div class="page-head">
+      <h2 class="page-title">部屋の準備</h2>
+      <p class="page-meta">第1試合・8席・AIのみが参加、あなたは傍聴席</p>
+    </div>
+    <div class="grid-prepare">
+      <div class="card">
+        <p class="panel-label">座次表</p>
+        <ul class="roster" id="roster-list"></ul>
+      </div>
+      <div class="side-col">
+        <div class="card">
+          <p class="panel-label">役職の内訳</p>
+          <ul class="roles-plan" id="roles-list"></ul>
+          <p class="note">配役は試合開始時に配られる。この画面では内訳だけを示す。</p>
+        </div>
+        <div class="card">
+          <p class="panel-label">開始</p>
+          <button class="btn btn-primary btn-wide" data-goto="day">試合を始める</button>
+          <p class="note">見た目の試作品・判定は行われない</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3) 昼の議論（昼・明） -->
+  <section class="screen" data-screen="day" hidden>
+    <div class="page-head">
+      <h2 class="page-title">1日目 昼の議論</h2>
+      <p class="page-meta">
+        <svg class="icon" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.25"/><path d="M8 4.5V8l2.5 1.5"/></svg>
+        <span>残り 4:12</span><span>・</span><span><span id="day-count">20</span>件</span>
+      </p>
+    </div>
+    <div class="grid-day">
+      <div class="main-col">
+        <div class="card card-log">
+          <div class="log-list" id="transcript-list" role="log" aria-live="polite" aria-label="速記ログ"></div>
+        </div>
+        <div class="card interject">
+          <p class="panel-label">傍聴席から</p>
+          <label class="sr-only" for="interject-text">傍聴席の発言</label>
+          <textarea id="interject-text" rows="2" placeholder="議論へ差し挟む一言"></textarea>
+          <div class="interject-row">
+            <p class="note">送ると朱で速記ログに加わる（参考・判定には入らない）</p>
+            <button class="btn btn-accent" id="interject-send">差し挟む</button>
+          </div>
+        </div>
+        <div class="flow-row">
+          <button class="btn btn-secondary" data-goto="vote">開票へ進む</button>
+        </div>
+      </div>
+      <aside class="side-col">
+        <div class="card">
+          <p class="panel-label">出席者</p>
+          <ul class="attend" id="attend-list"></ul>
+        </div>
+        <div class="card">
+          <p class="panel-label">この記録の読み方</p>
+          <ul class="legend">
+            <li><span class="lg-text lg-high">言い切っている発言は、濃いインクで書かれる。</span><span class="lg-meta">確信 0.80以上</span></li>
+            <li><span class="lg-text lg-mid">迷いのある発言は、中の濃さになる。</span><span class="lg-meta">0.60〜0.79</span></li>
+            <li><span class="lg-text lg-low">薄く滲む発言は、まだ決めかねている。</span><span class="lg-meta">0.59以下</span></li>
+          </ul>
+          <p class="note">確信度・応答秒数は試作用の仮の値</p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- 4) 投票と処刑（昼・明・朱の瞬間） -->
+  <section class="screen" data-screen="vote" hidden>
+    <div class="page-head">
+      <h2 class="page-title">1日目 開票</h2>
+      <p class="page-meta" id="vote-meta"></p>
+    </div>
+    <div class="grid-vote">
+      <div class="main-col">
+        <div class="card">
+          <p class="panel-label">得票</p>
+          <ul class="tally" id="tally-list"></ul>
+          <p class="note" id="vote-abstain"></p>
+        </div>
+        <div class="card verdict">
+          <p class="panel-label">処刑の宣告</p>
+          <div class="verdict-row">
+            <div class="verdict-body">
+              <p class="verdict-line" id="verdict-line"></p>
+              <p class="note" id="verdict-note"></p>
+              <p class="note" id="verdict-open"></p>
+            </div>
+            <div class="stamp-exec" aria-hidden="true">処刑</div>
+          </div>
+        </div>
+      </div>
+      <aside class="side-col">
+        <div class="card">
+          <p class="panel-label">傍聴席の推し</p>
+          <ul class="pick" id="pick-list"></ul>
+          <p class="note">参考のみ。票には数えられない</p>
+          <p class="pick-now" id="pick-now">未選択</p>
+        </div>
+        <div class="card">
+          <p class="panel-label">つぎへ</p>
+          <button class="btn btn-secondary btn-wide" data-goto="night">夜の行動へ</button>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- 5) 夜の行動（夜・暗） -->
+  <section class="screen" data-screen="night" hidden>
+    <div class="page-head">
+      <h2 class="page-title">1日目 夜の行動</h2>
+      <p class="page-meta" id="night-meta"></p>
+    </div>
+    <div class="grid-night">
+      <div class="main-col">
+        <div class="card card-night">
+          <p class="panel-label">夜の行動簿</p>
+          <p class="note" id="night-note"></p>
+          <ul class="ledger" id="night-list"></ul>
+          <div class="dawn">
+            <button class="btn btn-secondary" data-goto="result">夜明け・結果へ</button>
+          </div>
+        </div>
+      </div>
+      <aside class="side-col">
+        <div class="card">
+          <p class="panel-label">今夜の出席者</p>
+          <ul class="attend" id="night-attend"></ul>
+          <p class="note" id="night-attend-note"></p>
+        </div>
+        <div class="card">
+          <p class="panel-label">夜明けまで</p>
+          <p class="night-until mono" id="night-until"></p>
+          <p class="note" id="night-closed"></p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- 6) 結果と振り返り（昼・明） -->
+  <section class="screen" data-screen="result" hidden>
+    <div class="page-head">
+      <h2 class="page-title">試合結果</h2>
+      <p class="page-meta">3日目 昼・第1試合</p>
+    </div>
+    <div class="grid-result">
+      <div class="card">
+        <p class="panel-label">勝敗</p>
+        <p class="result-line" id="result-line"></p>
+        <p class="result-sub" id="result-sub"></p>
+        <ul class="figures" id="figures-list"></ul>
+      </div>
+      <div class="card">
+        <p class="panel-label">座次表・開示</p>
+        <ul class="reveal" id="reveal-list"></ul>
+        <p class="note">朱の落款と点は人狼陣営</p>
+      </div>
+      <div class="card">
+        <p class="panel-label">戦評</p>
+        <p class="epilogue" id="epilogue"></p>
+        <div class="quotes-head">
+          <p class="panel-label">ハイライト</p>
+        </div>
+        <div class="log-list" id="quotes-list"></div>
+      </div>
+      <div class="flow-row">
+        <button class="btn btn-ghost" data-goto="title">タイトルへ</button>
+        <button class="btn btn-ghost" data-goto="day">昼の議論を見直す</button>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<noscript><p class="noscript">この試作品はJavaScriptで仮データを表示しています。JSを有効にして開いてください。</p></noscript>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
